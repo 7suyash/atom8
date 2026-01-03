@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import ProcessMonitor from "@/components/ProcessMonitor";
 import IngestionPanel from "@/components/IngestionPanel";
 import ResultPreview from "@/components/ResultPreview";
