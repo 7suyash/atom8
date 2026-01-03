@@ -35,7 +35,7 @@ export const useJobStore = create<JobState>((set) => ({
     }, null, 2),
     progress: 0,
     steps: [
-        { name: 'Upload Document', status: 'pending' },
+        { name: 'Upload', status: 'pending' },
         { name: 'Analyze Schema', status: 'pending' },
         { name: 'Extract Data', status: 'pending' },
         { name: 'Validate Output', status: 'pending' },
@@ -65,7 +65,7 @@ export const useJobStore = create<JobState>((set) => ({
         result: null,
         logs: [],
         steps: [
-            { name: 'Upload Document', status: 'pending' },
+            { name: 'Upload', status: 'pending' },
             { name: 'Analyze Schema', status: 'pending' },
             { name: 'Extract Data', status: 'pending' },
             { name: 'Validate Output', status: 'pending' },

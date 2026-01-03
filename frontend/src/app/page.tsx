@@ -2,11 +2,21 @@ import ProcessMonitor from "@/components/ProcessMonitor";
 import IngestionPanel from "@/components/IngestionPanel";
 import ResultPreview from "@/components/ResultPreview";
 import SchemaEditor from "@/components/SchemaEditor";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-50/50 dark:bg-black p-4 sm:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
+
+        {/* Top App Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold">Atom8</h1>
+          <AnimatedThemeToggler
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+          />
+        </div>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -44,6 +54,8 @@ export default function Home() {
           </div>
 
         </div>
+
+
       </div>
     </main>
   );

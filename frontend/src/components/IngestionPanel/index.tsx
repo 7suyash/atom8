@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback } from 'react';
-import { RgbContainer } from '@/components/ui/RgbContainer';
+import { RgbContainer } from '@/components/magicui/RgbContainer';
 import { useJobStore } from '@/store/useJobStore';
 import { Upload, File as FileIcon, X } from 'lucide-react';
 import { motion } from 'framer-motion';

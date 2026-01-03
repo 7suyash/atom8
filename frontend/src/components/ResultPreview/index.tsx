@@ -4,7 +4,7 @@ import React from 'react';
 import { useJobStore } from '@/store/useJobStore';
 import { Table, Download, Copy, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { RgbContainer } from '@/components/ui/RgbContainer';
+import { RgbContainer } from '@/components/magicui/RgbContainer';
 
 export default function ResultPreview() {
     const { result, status } = useJobStore();

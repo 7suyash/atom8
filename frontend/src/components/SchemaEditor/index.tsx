@@ -3,7 +3,7 @@
 import React from 'react';
 import { useJobStore } from '@/store/useJobStore';
 import { Database, Save } from 'lucide-react';
-import { RgbContainer } from '@/components/ui/RgbContainer';
+import { RgbContainer } from '@/components/magicui/RgbContainer';
 
 export default function SchemaEditor() {
     const { schema, setSchema, status } = useJobStore();

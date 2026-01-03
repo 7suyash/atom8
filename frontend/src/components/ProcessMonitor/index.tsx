@@ -1,102 +1,214 @@
 "use client";
 
-import React from 'react';
-import { useJobStore } from '@/store/useJobStore';
-import { Activity, Check, Circle, Loader2, Play } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { usePipeline } from '@/hooks/usePipeline';
-import { RgbContainer } from '@/components/ui/RgbContainer';
+import { AnimatedBeam } from "@/components/magicui/animated-beam";
+import React, { useRef } from "react";
+import { useJobStore } from "@/store/useJobStore";
+import {
+  Activity,
+  Play,
+  Monitor,
+  Cloud,
+  FileUp,
+  ScanSearch,
+  Database,
+  ShieldCheck,
+  Check,
+  Loader2,
+  Circle
+} from "lucide-react";
+import { usePipeline } from "@/hooks/usePipeline";
+import { RgbContainer } from "@/components/magicui/RgbContainer";
+import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 export default function ProcessMonitor() {
-    const { steps, progress, status, logs } = useJobStore();
-    const { startPipeline } = usePipeline();
+  const { status, logs, steps } = useJobStore();
+  const { startPipeline } = usePipeline();
 
-    const isRunning = status === 'processing' || status === 'uploading';
-    const isCompleted = status === 'completed';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const monitorRef = useRef<HTMLDivElement>(null);
+  const cloudRef = useRef<HTMLDivElement>(null);
 
-    return (
-        <RgbContainer>
-            <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-lg font-semibold flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-amber-500" />
-                        Live Monitor
-                    </h2>
-                    {status === 'idle' && (
-                        <button
-                            onClick={startPipeline}
-                            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
-                        >
-                            <Play className="w-4 h-4" />
-                            Start Job
-                        </button>
-                    )}
-                </div>
+  // Refs for each step
+  const stepRef0 = useRef<HTMLDivElement>(null);
+  const stepRef1 = useRef<HTMLDivElement>(null);
+  const stepRef2 = useRef<HTMLDivElement>(null);
+  const stepRef3 = useRef<HTMLDivElement>(null);
 
-                <div className="space-y-6">
-                    {/* Stepper */}
-                    <div className="relative flex justify-between">
-                        {steps.map((step, idx) => (
-                            <div key={idx} className="flex flex-col items-center relative z-10 w-full">
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        scale: step.status === 'current' ? 1.1 : 1,
-                                        backgroundColor: step.status === 'completed' ? '#10b981' : step.status === 'current' ? '#f59e0b' : '#e4e4e7'
-                                    }}
-                                    className={cn(
-                                        "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-300",
-                                        step.status === 'completed' ? "border-emerald-500 text-white" :
-                                            step.status === 'current' ? "border-amber-500 text-white" : "border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-400"
-                                    )}
-                                >
-                                    {step.status === 'completed' ? <Check className="w-4 h-4" /> :
-                                        step.status === 'current' ? <Loader2 className="w-4 h-4 animate-spin" /> :
-                                            <span className="text-xs">{idx + 1}</span>}
-                                </motion.div>
-                                <span className={cn(
-                                    "mt-2 text-xs font-medium transition-colors duration-300 text-center",
-                                    step.status === 'current' ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-500"
-                                )}>{step.name}</span>
+  const stepRefs = [stepRef0, stepRef1, stepRef2, stepRef3];
 
-                                {/* Line connector */}
-                                {idx !== steps.length - 1 && (
-                                    <div className="absolute top-4 left-1/2 w-full h-[2px] bg-zinc-100 dark:bg-zinc-800 -z-10">
-                                        <motion.div
-                                            className="h-full bg-emerald-500 origin-left"
-                                            initial={{ scaleX: 0 }}
-                                            animate={{ scaleX: step.status === 'completed' ? 1 : 0 }}
-                                            transition={{ duration: 0.5 }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+  const isRunning = status === "processing" || status === "uploading";
 
-                    {/* Console/Logs */}
-                    <div className="mt-6 bg-zinc-950 rounded-xl overflow-hidden font-mono text-xs border border-zinc-800">
-                        <div className="flex items-center px-4 py-2 border-b border-zinc-900 bg-zinc-900/50">
-                            <div className="flex gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
-                                <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
-                            </div>
-                            <span className="ml-3 text-zinc-500">Pipeline Output</span>
-                        </div>
-                        <div className="p-4 h-32 overflow-y-auto space-y-1 text-zinc-400">
-                            {logs.length === 0 && <span className="opacity-30">Waiting for job to start...</span>}
-                            {logs.map((log, i) => (
-                                <div key={i} className="flex gap-2">
-                                    <span className="text-zinc-600">[{new Date().toLocaleTimeString()}]</span>
-                                    <span>{log}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+  // Helper to determining step icon
+  const getStepIcon = (index: number, stepStatus: string) => {
+    if (stepStatus === 'completed') return <Check className="h-5 w-5 text-emerald-500" />;
+    if (stepStatus === 'current') return <Loader2 className="h-5 w-5 animate-spin text-amber-500" />;
+
+    // Default icons based on index
+    switch (index) {
+      case 0: return <FileUp className="h-5 w-5 text-zinc-500" />;
+      case 1: return <ScanSearch className="h-5 w-5 text-zinc-500" />;
+      case 2: return <Database className="h-5 w-5 text-zinc-500" />;
+      case 3: return <ShieldCheck className="h-5 w-5 text-zinc-500" />;
+      default: return <Circle className="h-5 w-5 text-zinc-300" />;
+    }
+  };
+
+  return (
+    <RgbContainer>
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Activity className="w-5 h-5 text-amber-500" />
+            Live Monitor
+          </h2>
+
+          {status === "idle" && (
+            <button
+              onClick={startPipeline}
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
+            >
+              <Play className="w-4 h-4" />
+              Start Job
+            </button>
+          )}
+        </div>
+
+        {/* Horizontal Process Visualization */}
+        <div
+          ref={containerRef}
+          className="relative flex h-32 w-full items-center justify-between overflow-hidden rounded-xl bg-zinc-50 px-4 dark:bg-zinc-900"
+        >
+          {/* Start Node: Monitor */}
+          <div className="flex flex-col items-center gap-2 z-10 w-20">
+            <div
+              ref={monitorRef}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800"
+            >
+              <Monitor className="h-6 w-6 text-zinc-500" />
             </div>
-        </RgbContainer>
-    );
+            <span className="text-xs font-medium text-zinc-500">System</span>
+          </div>
+
+          {/* Steps */}
+          {steps.map((step, index) => {
+            const isCurrent = step.status === 'current';
+            const isCompleted = step.status === 'completed';
+
+            return (
+              <div key={step.name} className="flex flex-col items-center gap-2 z-10 w-24 text-center">
+                <div
+                  ref={stepRefs[index]}
+                  className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm border transition-colors duration-300",
+                    isCompleted ? "border-emerald-500 ring-2 ring-emerald-500/20" :
+                      isCurrent ? "border-amber-500 ring-2 ring-amber-500/20" :
+                        "border-zinc-200 dark:border-zinc-800",
+                    "dark:bg-zinc-950"
+                  )}
+                >
+                  {getStepIcon(index, step.status)}
+                </div>
+                <span className={cn(
+                  "text-xs font-medium transition-colors duration-300",
+                  isCurrent ? "text-amber-500" :
+                    isCompleted ? "text-emerald-500" :
+                      "text-zinc-400"
+                )}>
+                  {step.name}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* End Node: Cloud */}
+          <div className="flex flex-col items-center gap-2 z-10 w-20">
+            <div
+              ref={cloudRef}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800"
+            >
+              <Cloud className="h-6 w-6 text-zinc-500" />
+            </div>
+            <span className="text-xs font-medium text-zinc-500">Cloud</span>
+          </div>
+
+          {/* Beams */}
+          {/* Monitor -> Step 0 */}
+          <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={monitorRef}
+            toRef={stepRef0}
+            className={cn("opacity-0", isRunning && "opacity-50")}
+            duration={2}
+          />
+
+          {/* Step 0 -> Step 1 */}
+          <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={stepRef0}
+            toRef={stepRef1}
+            className={cn("opacity-0", isRunning && "opacity-50")}
+            duration={2}
+          />
+
+          {/* Step 1 -> Step 2 */}
+          <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={stepRef1}
+            toRef={stepRef2}
+            className={cn("opacity-0", isRunning && "opacity-50")}
+            duration={2}
+          />
+
+          {/* Step 2 -> Step 3 */}
+          <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={stepRef2}
+            toRef={stepRef3}
+            className={cn("opacity-0", isRunning && "opacity-50")}
+            duration={2}
+          />
+
+          {/* Step 3 -> Cloud */}
+          <AnimatedBeam
+            containerRef={containerRef}
+            fromRef={stepRef3}
+            toRef={cloudRef}
+            className={cn("opacity-0", isRunning && "opacity-50")}
+            duration={2}
+          />
+        </div>
+
+        {/* Console / Logs */}
+        <div className="mt-6 bg-zinc-950 rounded-xl overflow-hidden font-mono text-xs border border-zinc-800">
+          <div className="flex items-center px-4 py-2 border-b border-zinc-900 bg-zinc-900/50">
+            {/* ... (keep dots) ... */}
+            <div className="flex gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
+              <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
+              <div className="w-2.5 h-2.5 rounded-full bg-zinc-700" />
+            </div>
+            <span className="ml-3 text-zinc-500">Pipeline Output</span>
+          </div>
+
+          <div className="p-4 h-32 overflow-y-auto space-y-1 text-zinc-400">
+            {logs.length === 0 && (
+              <span className="opacity-30">
+                Waiting for job to start...
+              </span>
+            )}
+            {logs.map((log, i) => (
+              <div key={i} className="flex gap-2">
+                <span className="text-zinc-600">
+                  [{new Date().toLocaleTimeString()}]
+                </span>
+                <span>{log}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </RgbContainer>
+  );
 }
